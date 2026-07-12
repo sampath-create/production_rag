@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+.venv/
+
+# Environment files
+.env
+.env.*
+
+# Local processed data / artifacts
+processed_data/
+
+# Testing and caching
+.pytest_cache/
+.ipynb_checkpoints/
+*.log
+*.sqlite
+
