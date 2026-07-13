@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../../images/ai.png" type="image/png">
+    <required-links></required-links>
+    <link rel="stylesheet" href="./problem_statement/md.css">
+    <title>Experiment Viewer</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <special-header></special-header>
+    <h1 id="experiment-title">Experiment</h1>
+    <div id="experiment-content">Loading...</div>
+    <script>
+        async function loadMarkdown() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const expPath = urlParams.get('path');
+            if (!expPath) {
+                document.getElementById("experiment-content").innerHTML = "<p>Error: No experiment specified.</p>";
+                return;
+            }
+            console.log("Fetching markdown from:", expPath);
+            try {
+                const response = await fetch(expPath);
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                const markdownText = await response.text();
+                // Create navDiv FIRST
+                const navDiv = document.createElement('div');
+                navDiv.className = 'experiment-nav';
+                navDiv.style.marginBottom = '1em';
+                navDiv.innerHTML = `
+                  <a href="../calculus_using_matlab/Matlab.html#experiments">List of Experiment <span class="arrow-black">&gt;</span></a>
+                  <a id="code-walkthrough-link" href="#">Code Walkthrough <span class="arrow-black">&gt;</span></a>
+                `;
+                // Set the correct code walkthrough link based on the .md file in the URL
+                const mdPath = expPath;
+                let expFile = '';
+                if (mdPath) {
+                  const match = mdPath.match(/exp(\d+)\.md$/);
+                  if (match) {
+                    expFile = match[1];
+                  }
+                }
+                if (expFile) {
+                  navDiv.querySelector('#code-walkthrough-link').href = './experiments/experiment_viewer.html?exp=exp' + expFile;
+                } else {
+                  navDiv.querySelector('#code-walkthrough-link').style.display = 'none';
+                }
+                // Render navDiv + markdown
+                document.getElementById("experiment-content").innerHTML = '';
+                document.getElementById("experiment-content").appendChild(navDiv);
+                // Add a thin horizontal line
+                const hr = document.createElement('hr');
+                hr.style.margin = '0.5em 0';
+                hr.style.borderTop = '1px solid #ccc';
+                document.getElementById("experiment-content").appendChild(hr);
+                document.getElementById("experiment-content").innerHTML += marked.parse(markdownText);
+                hljs.highlightAll();
+            } catch (error) {
+                document.getElementById("experiment-content").innerHTML = `<p>Error loading experiment: ${error.message}</p>`;
+            }
+        }
+        loadMarkdown();
+    </script>
+    <special-footer></special-footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="HeaderFooter.js"></script>
+</body>
+</html>

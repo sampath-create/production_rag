@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Invaders</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            font-size: 16px; /* Ensure base font size is defined */
+        }
+        body {
+            background-image: url('./assets/startScreenBackground.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }    
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 50rem; 
+            padding: 1.25rem; 
+            z-index: 1;
+            position: relative;
+        }       
+        .header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-top: 1rem;
+        }     
+        .score-level {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 0.625rem; 
+        }        
+        canvas { 
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 37.5rem; 
+            height: auto;
+        }        
+        #scoreBoard, #levelBoard {
+            font-size: 1.5rem; 
+            margin: 0;
+        }        
+        #restartButton {
+            display: none;
+            margin-top: 1.25rem; 
+            font-size: 1.25rem; 
+            padding: 0.625rem 1.25rem; 
+            cursor: pointer;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 0.313rem; 
+            position: absolute;
+            bottom: 4rem; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        } 
+        .back-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .back-btn:hover {
+            background-color: #45a049;
+        }
+        #restartButton:hover {
+            background-color: #45a049;
+        }        
+        h1 {
+            font-size: 2.25rem;
+            margin: 2.5rem 0 0.625rem 0;
+            text-shadow: 0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.7);
+        }
+        
+        /* Add responsive styles for mobile */
+        @media (max-width: 768px) {
+            .back-btn {
+                padding: 6px 14px;
+                font-size: 0.9rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                margin-top: 2.8rem;
+            }
+            
+            .score-level {
+                margin-top: 0.5rem;
+            }
+            
+            #scoreBoard, #levelBoard {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="https://aihub-vvit.github.io/Game.html"><button class="back-btn">← Back</button></a>
+    
+    <div class="game-container">
+        <div class="header">
+            <h1>Space Invaders</h1>
+            <div class="score-level">
+                <div id="scoreBoard">Score: 0</div>
+                <div id="levelBoard">Level: 1</div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="600" height="700"></canvas>
+    </div>
+    <button id="restartButton" onclick="restartGame()">Restart Game</button>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreBoard = document.getElementById("scoreBoard");
+        const levelBoard = document.getElementById("levelBoard");
+        const restartButton = document.getElementById("restartButton");
+        const spaceshipSpeed = 8;
+        const bulletSpeed = 5;
+        const alienSpeed = 1;
+        const cooldown = 500;
+        const alienBulletSpeed = 3;
+        const alienCooldown = 2000;
+        let lastShotTime = 0;
+        let lastAlienShotTime = 0;
+        let gameOver = false;
+        let score = 0;
+        let level = 1;
+        let startX;
+        const spaceshipImg = new Image();
+        spaceshipImg.src = './assets/spaceship.png';
+        const alienImages = ['./assets/alien1.png', './assets/alien2.png', './assets/alien3.png', './assets/alien4.png', './assets/alien5.png'];
+        const alienImgs = alienImages.map(src => {
+            const img = new Image();
+            img.src = src;
+            return img;
+        });
+        const bulletImg = new Image();
+        bulletImg.src = './assets/bullet.png';
+        const explosionSound = new Audio('./assets/img_explosion.wav');
+        const laserSound = new Audio('./assets/explosion2.wav');
+
+        class Spaceship {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 50;
+                this.height = 50;
+            }
+            draw() {
+                ctx.drawImage(spaceshipImg, this.x, this.y, this.width, this.height);
+            }
+            move(direction) {
+                if (direction === "left" && this.x > 0) this.x -= spaceshipSpeed;
+                if (direction === "right" && this.x < canvas.width - this.width) this.x += spaceshipSpeed;
+            }
+            shoot() {
+                let now = Date.now();
+                if (now - lastShotTime > cooldown) {
+                    bullets.push(new Bullet(this.x + this.width / 2, this.y));
+                    laserSound.play();
+                    lastShotTime = now;
+                }
+            }
+        }
+        class Bullet {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 5;
+                this.height = 15;
+            }
+            draw() {
+                ctx.drawImage(bulletImg, this.x, this.y, this.width, this.height);
+            }
+            update() {
+                this.y -= bulletSpeed;
+            }
+        }
+        class Alien {
+            constructor(x, y, img) {
+                this.x = x;
+                this.y = y;
+                this.width = 40;
+                this.height = 40;
+                this.moveDirection = 1;
+                this.moveCounter = 0;
+                this.img = img;
+            }
+            draw() {
+                ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+            }
+            update() {
+                this.x += this.moveDirection * alienSpeed;
+                this.moveCounter++;
+                if (this.moveCounter > 75) {
+                    this.moveDirection *= -1;
+                    this.moveCounter = 0;
+                }
+                if (this.y + this.height >= spaceship.y) {
+                    gameOver = true;
+                }
+            }
+            shoot() {
+                let now = Date.now();
+                if (now - lastAlienShotTime > alienCooldown) {
+                    alienBullets.push(new AlienBullet(this.x + this.width / 2, this.y + this.height, "down"));
+                    lastAlienShotTime = now;
+                }
+            }
+        }
+        class AlienBullet {
+            constructor(x, y, direction) {
+                this.x = x;
+                this.y = y;
+                this.width = 5;
+                this.height = 15;
+                this.direction = direction;
+            }
+            draw() {
+                ctx.drawImage(bulletImg, this.x, this.y, this.width, this.height);
+            }
+            update() {
+                switch (this.direction) {
+                    case "up":
+                        this.y -= alienBulletSpeed;
+                        break;
+                    case "down":
+                        this.y += alienBulletSpeed;
+                        break;
+                    case "left":
+                        this.x -= alienBulletSpeed;
+                        break;
+                    case "right":
+                        this.x += alienBulletSpeed;
+                        break;
+                }
+            }
+        }
+        let spaceship, bullets, aliens, alienBullets;
+        function initializeGame() {
+            spaceship = new Spaceship(canvas.width / 2 - 25, canvas.height - 150);
+            bullets = [];
+            aliens = [];
+            alienBullets = [];
+            score = 0;
+            level = 1;
+            gameOver = false;
+            restartButton.style.display = "none";
+            createAliens();
+            updateScore();
+            updateLevel();
+            gameLoop();
+        }
+        function createAliens() {
+            aliens = [];
+            let rows = Math.min(5 + level, 8);
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < 5; col++) {
+                    const img = alienImgs[Math.floor(Math.random() * alienImgs.length)];
+                    aliens.push(new Alien(100 + col * 80, 10 + row * 60, img));
+                }
+            }
+        }
+        function updateScore() {
+            scoreBoard.innerText = `Score: ${score}`;
+        }
+        function updateLevel() {
+            levelBoard.innerText = `Level: ${level}`;
+        }
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (gameOver) {
+                ctx.fillStyle = "white";
+                ctx.font = "40px Arial";
+                ctx.fillText("Game Over", canvas.width / 2 - 100, canvas.height / 2);
+                restartButton.style.display = "block";
+                return;
+            }
+            spaceship.draw();
+            bullets.forEach((bullet, index) => {
+                bullet.update();
+                bullet.draw();
+                if (bullet.y < 0) bullets.splice(index, 1);
+            });
+            aliens.forEach((alien, aIndex) => {
+                alien.update();
+                alien.draw();
+                if (Math.random() < 0.01) { 
+                    alien.shoot();
+                }
+                bullets.forEach((bullet, bIndex) => {
+                    if (
+                        bullet.x < alien.x + alien.width &&
+                        bullet.x + bullet.width > alien.x &&
+                        bullet.y < alien.y + alien.height &&
+                        bullet.y + bullet.height > alien.y
+                    ) {
+                        aliens.splice(aIndex, 1);
+                        bullets.splice(bIndex, 1);
+                        explosionSound.play();
+                        score += 10;
+                        updateScore();
+                    }
+                });
+            });
+            alienBullets.forEach((bullet, index) => {
+                bullet.update();
+                bullet.draw();
+                if (bullet.y > canvas.height || bullet.y < 0 || bullet.x > canvas.width || bullet.x < 0) alienBullets.splice(index, 1);
+                if (
+                    bullet.x < spaceship.x + spaceship.width &&
+                    bullet.x + bullet.width > spaceship.x &&
+                    bullet.y < spaceship.y + spaceship.height &&
+                    bullet.y + bullet.height > spaceship.y
+                ) {
+                    gameOver = true;
+                }
+            });
+            if (aliens.length === 0) {
+                level++;
+                createAliens(); 
+                updateLevel();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+        function restartGame() {
+            initializeGame();
+        }
+       document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft") spaceship.move("left");
+            if (event.key === "ArrowRight") spaceship.move("right");
+            if (event.key === " ") spaceship.shoot();
+        });
+        canvas.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            spaceship.shoot(); // Shooting on touch start
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchmove', function(e) {
+            if (startX) {
+                let touchX = e.touches[0].clientX;
+                let moveDistance = touchX - startX;
+                
+                if (moveDistance < 0) {
+                    spaceship.move("left");
+                } else if (moveDistance > 0) {
+                    spaceship.move("right");
+                }
+                startX = touchX;
+            }
+            e.preventDefault();
+        });
+        canvas.addEventListener('touchend', function(e) {
+            startX = null;
+            e.preventDefault();
+        });
+        document.body.addEventListener('touchstart', function(e) {
+            if (e.target === canvas) {
+                e.preventDefault();
+            }
+        }, {passive: false});
+        initializeGame();
+    </script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./images/ai.png" type="image/png">
+    <required-links></required-links>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <title>AI-HUB-Home</title>
+    <link rel="stylesheet" href="./styling/home.css">
+</head>
+<body>
+    <special-header></special-header>
+    <main>
+        <div class="welcome-text">
+            <h5>Welcome all</h5>
+        </div>
+        <div class="container">
+            <img src="./images/vvit1.png" class="outer" alt="Rotating Outer Image">
+            <img src="./images/circular_cen.png" class="inner" alt="Static Inner Image">
+        <div class="slider-container">
+            <div class="slider" role="region" aria-label="Featured Content Slider">
+                <div class="slides" role="list">
+                    <div id="slides__1" class="slide" role="listitem" aria-label="Slide 1">
+                        <span class="slide__text">
+                            <img src="./images/index1.png" alt="Decorative Design" class="image">
+                            <h6>Inspiration is not tangible unless you</h6>
+                            <br>
+                            <br>
+                            <h5><span id="typed-text"></span></h5>
+                            <img src="./images/index2.png" alt="Decorative Design" class="image">
+                        </span>
+                    </div>
+                    <div id="slides__2" class="slide" role="listitem" aria-label="Slide 2">
+                        <span class="slide__text">
+                            <div class="container">
+                                <h5 class="wheel-text">High Performance Computing Facilities</h5>
+                            </div>
+                        </span>
+                    </div>
+                    <div id="slides__3" class="slide" role="listitem" aria-label="Slide 3">
+                        <span class="slide__text">
+                            <div class="container">
+                                <h5 class="wheel-text">NVIDIA Jetson Edge Computing Facility</h5>
+                            </div>
+                        </span>
+                    </div>
+                    <div id="slides__4" class="slide" role="listitem" aria-label="Slide 4">
+                        <span class="slide__text">
+                            <div class="container">
+                                <h5 class="wheel-text">AI Research & Development</h5>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+                <div class="slider__nav">
+                    <a class="slider__navlink" href="#slides__1" aria-label="Go to Slide 1"></a>
+                    <a class="slider__navlink" href="#slides__2" aria-label="Go to Slide 2"></a>
+                    <a class="slider__navlink" href="#slides__3" aria-label="Go to Slide 3"></a>
+                    <a class="slider__navlink" href="#slides__4" aria-label="Go to Slide 4"></a>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div>
+            <br>
+            <br>
+            <p><b>"</b> We are the student community of <br> VVIT dedicated to leveraging AI <b>"</b></p>
+            <p>This site is still under construction.</p>
+        </div>
+    </main>
+    <script>
+        // Typing Effect
+        const words = ["Embrace The Uncertainty", "Focus on the process", "Practice mindfulness", "Cultivate gratitude", "Reframe failure"];
+        let i = 0, j = 0, isDeleting = false;
+        const typingSpeed = 100, deletingSpeed = 50, pauseTime = 1000;
+
+        function typeEffect() {
+            const typedText = document.getElementById("typed-text");
+            let currentWord = words[i];
+
+            j = isDeleting ? j - 1 : j + 1;
+            typedText.innerHTML = `<h6>${currentWord.substring(0, j)}</h6>`;
+            let nextSpeed = isDeleting ? deletingSpeed : typingSpeed;
+
+            if (!isDeleting && j === currentWord.length) {
+                isDeleting = true;
+                nextSpeed = pauseTime;
+            } else if (isDeleting && j === 0) {
+                isDeleting = false;
+                i = (i + 1) % words.length;
+                nextSpeed = typingSpeed;
+            }
+
+            setTimeout(typeEffect, nextSpeed);
+        }
+        document.addEventListener("DOMContentLoaded", () => setTimeout(typeEffect, 300));
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const slides = document.querySelector(".slides");
+            const slideCount = document.querySelectorAll(".slide").length;
+            const navLinks = document.querySelectorAll(".slider__navlink");
+            let currentIndex = 0;
+
+            function updateActiveNavLink() {
+                navLinks.forEach((link, index) => {
+                    if (index === currentIndex) {
+                        link.classList.add("active");
+                    } else {
+                        link.classList.remove("active");
+                    }
+                });
+            }
+
+            function moveToSlide(index) {
+                currentIndex = index;
+                const slideWidth = slides.offsetWidth;
+                slides.scrollTo({
+                    left: currentIndex * slideWidth,
+                    behavior: "smooth",
+                });
+                updateActiveNavLink();
+            }
+
+            navLinks.forEach((link, index) => {
+                link.addEventListener("mouseover", () => {
+                    moveToSlide(index);
+                });
+            });
+            updateActiveNavLink();
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const slides = document.querySelectorAll(".slide");
+            let maxHeight = 0;
+            slides.forEach(slide => {
+                const slideHeight = slide.offsetHeight;
+                if (slideHeight > maxHeight) {
+                    maxHeight = slideHeight;
+                }
+            });
+            slides.forEach(slide => {
+                slide.style.height = `${maxHeight}px`;
+            });
+        });
+    </script>
+    <nav class="navbar navbar-expand-lg fixed-bottom bg-body-tertiary">
+        <div class="container-fluid" id="footer">
+            <ul style="list-style: none; display: flex; justify-content: center;">
+                <li class="desc_item"><i class="fa-solid fa-building-columns"></i><a href="https://www.vvitguntur.com/">VVIT</a></li>
+                <li class="desc_item"><i class="fa-solid fa-location-dot"></i><a href="https://www.google.com/maps/place/Vasireddy+Venkatadri+Institute+of+Technology/data=!4m2!3m1!1s0x0:0x8c86e4f36490336b?sa=X&ved=1t:2428&ictx=111">Guntur</a></li>
+                <li class="desc_item"><i class="fa-solid fa-envelope"></i><a href="mailto:someone@example.com">Mail</a></li>
+                <li class="desc_item"><i class="fa-brands fa-github"></i><a href="https://github.com/AIHUB-VVIT">Github</a></li>
+            </ul>
+        </div>
+    </nav>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="./reuse_elements/HeaderFooter.js"></script>
+</body>
+</html>

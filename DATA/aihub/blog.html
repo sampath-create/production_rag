@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./images/ai.png" type="image/png">
+    <required-links></required-links>
+    <link rel="stylesheet" href="./styling/blog.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <title>AI-HUB-About</title>
+</head>
+<body>
+    <special-header></special-header>
+        <!-- Main content -->
+         <br><br>
+        <h1 id="page-title">BLOGS</h1>
+        <main id="blog-container"></main>
+        <script>
+             
+            async function fetchBlogs() {
+                try {
+                    const response = await fetch('./blogs/blogs.json');  // Ensure correct path
+                    const blogs = await response.json();         // Parse JSON
+                    const container = document.getElementById('blog-container');
+            
+                    blogs.forEach(blog => {
+                        const card = document.createElement('div');
+                        card.classList.add('blog-card');
+            
+                        card.innerHTML = `
+                            <h2>${blog.title}</h2>
+                            <a href="./blog_viewer.html?path=${encodeURIComponent(blog.path)}">Read More</a>
+                        `;
+            
+                        container.appendChild(card);
+                    });
+                } catch (error) {
+                    console.error("Error loading blogs:", error);
+                }
+            }
+            
+            fetchBlogs();
+            
+            
+        </script>
+        <special-footer></special-footer>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="./reuse_elements/HeaderFooter.js"></script>
+</body>
+</html>
