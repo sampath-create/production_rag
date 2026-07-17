@@ -5,6 +5,8 @@ load_dotenv()
 
 class Settings:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "gemini")
+    GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "models/gemini-embedding-2-preview")
 
     QDRANT_URL = os.getenv("QDRANT_CLUSTER_ENDPOINT")
     QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
