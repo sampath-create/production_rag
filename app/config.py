@@ -17,8 +17,8 @@ class Settings:
     GROQ_FALLBACK_API_KEY = os.getenv("GROQ_FALLBACK_API_KEY")
 
     PORTKEY_API_KEY = os.getenv("PORTKEY_API_KEY")
-    GROQ_SLUG =  "rag"     
-    GROQ_SLUG_2 = "brag"  
+    GROQ_SLUG =  "rag1"     
+    GROQ_SLUG_2 = "rag2"  
 
     
     LANGSMITH_TRACING = os.getenv("LANGSMITH_TRACING", "true")
